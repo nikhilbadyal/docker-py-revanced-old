@@ -22,4 +22,4 @@ jobs:
         with:
           artifacts: "apks/output.apk"
           token: ${{ secrets.GH_TOKEN }}
-          tag: Latest
+          tag: Latest-${{ github.run_id }}-${{ github.run_attempt }}
