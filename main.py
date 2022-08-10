@@ -12,8 +12,7 @@ from requests import Session
 from selectolax.lexbor import LexborHTMLParser
 from typing import Tuple, List, Dict
 
-temp_dir = TemporaryDirectory()
-temp_folder = Path(temp_dir.name)
+temp_folder = Path('apks')
 session = Session()
 session.headers['User-Agent'] = 'anything'
 
@@ -166,7 +165,6 @@ class ArgParser:
 @register
 def close():
     session.close()
-    temp_dir.cleanup()
     cache = Path('revanced-cache')
     if cache.is_dir():
         rmtree(cache)

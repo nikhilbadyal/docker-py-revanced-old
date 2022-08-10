@@ -15,4 +15,11 @@ jobs:
 
       - name: Build APK
         run: |
-          docker-compose run --rm revanced python main.py
+          docker-compose up
+
+      - name: Upload Build Artifact(youtube)
+        uses: actions/upload-artifact@v3
+        with:
+          name: revanced-youtube
+          path: |
+              apks/output.apk
