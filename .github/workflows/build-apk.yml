@@ -1,0 +1,18 @@
+name: Build Revanced APK
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: APK Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Build APK
+        run: |
+          docker-compose run --rm revanced python main.py
