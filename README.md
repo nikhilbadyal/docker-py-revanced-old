@@ -5,7 +5,7 @@ This programme, like most programmes made for ReVanced, helps you to compile and
 ### Installing Requirements
 
 ```shell
-python -m pip install requests selectolax 
+python -m pip install requests selectolax
 ```
 
 ### Running
