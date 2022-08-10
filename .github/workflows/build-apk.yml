@@ -18,8 +18,8 @@ jobs:
           docker-compose up
 
       - name: Upload Build Artifact(youtube)
-        uses: actions/upload-artifact@v3
+        uses: ncipollo/release-action@v1
         with:
-          name: revanced-youtube
-          path: |
-              apks/output.apk
+          artifacts: "apks/output.apk"
+          token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ github.ref }}

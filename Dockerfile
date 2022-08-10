@@ -85,7 +85,6 @@ COPY ./entrypoint /entrypoint
 RUN sed -i 's/\r$//g' /entrypoint
 RUN chmod +x /entrypoint
 
-RUN mkdir apks
 # copy application code to WORKDIR
 COPY . ${APP_HOME}
 
