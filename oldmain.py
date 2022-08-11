@@ -200,10 +200,6 @@ def main():
 
     def get_patches():
         print("Getting patches for app youtube")
-        longest = len(max(app_patches, key=lambda p: len(p["name"]))["name"])
-
-        for i, v in enumerate(app_patches):
-            print(f'[{i:>02}] {v["name"]:<{longest + 4}}: {v["description"]}')
         selected_patches = list(range(0, len(app_patches)))
         selected_patches.remove(9)
 
