@@ -115,7 +115,7 @@ class Patches:
                     (n, d, v), a = [i.replace("`", "").strip() for i in patch], app_name
                     app_patches.append((n, d, a, v))
 
-            available_patches.extend(app_patches)
+            available_patches.extend(app_patches[2:])
 
         youtube, music, twitter, reddit = [], [], [], []
         for n, d, a, v in available_patches:
