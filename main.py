@@ -179,8 +179,10 @@ class Patches:
         else:
             print("Invalid app name.")
             sys.exit(-1)
-        version = next(i["version"] for i in patches if i["version"] != "all")
-        print("Version for app is  %s" % version)
+        version = ""
+        if app in ("youtube", "youtube-music"):
+            version = next(i["version"] for i in patches if i["version"] != "all")
+            print("Version for app is  %s" % version)
         return patches, version
 
 
