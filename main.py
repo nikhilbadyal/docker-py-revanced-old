@@ -257,7 +257,7 @@ def main() -> None:
         executor.map(downloader.repository, ("cli", "integrations", "patches"))
 
     def get_patches() -> None:
-        print(f"Getting patches for app {app}")
+        print(f"Excluding patches for app {app}")
         selected_patches = list(range(0, len(app_patches)))
         if app == "youtube":
             selected_patches.remove(9)
