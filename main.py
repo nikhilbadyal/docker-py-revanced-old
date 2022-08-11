@@ -51,6 +51,7 @@ class Downloader:
         version = "-".join(
             v.zfill(2 if i else 0) for i, v in enumerate(version.split("."))
         )
+        print(f"Version for {app} to download  from apkmirror is {version}")
 
         page = """
         https://www.apkmirror.com/apk/google-inc/
