@@ -243,7 +243,13 @@ def main():
         print("Trying to build %s" % app)
         app_patches, version = patches.get(app=app)
         with ThreadPoolExecutor() as executor:
-            executor.submit(downloader.apkmirror, app, version)
+            executor.submit(
+                downloader.apkmirror
+                if app != "reddit" or app != "twitter"
+                else downloader.apkmirror_reddit_twitter,
+                app,
+                version,
+            )
             executor.submit(get_patches).add_done_callback(
                 lambda _: downloader.report()
             )
