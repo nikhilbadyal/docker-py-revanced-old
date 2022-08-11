@@ -274,9 +274,9 @@ def main() -> None:
         app_patches, version = patches.get(app=app)
         with ThreadPoolExecutor() as executor:
             executor.submit(
-                downloader.apkmirror
-                if app != "reddit" or app != "twitter"
-                else downloader.apkmirror_reddit_twitter,
+                downloader.apkmirror_reddit_twitter
+                if app == "reddit" or app == "twitter"
+                else downloader.apkmirror,
                 app,
                 version,
             )
