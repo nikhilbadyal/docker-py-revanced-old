@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from atexit import register
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -19,7 +20,7 @@ apps = ["youtube", "youtube-music", "twitter", "reddit"]
 
 
 class Downloader:
-    _CHUNK_SIZE = 2**21 * 5
+    _CHUNK_SIZE = 2 ** 21 * 5
     _QUEUE = PriorityQueue()
     _QUEUE_LENGTH = 0
 
@@ -43,8 +44,7 @@ class Downloader:
         cls._QUEUE.put((perf_counter() - start, file_name))
 
     @classmethod
-    def apkmirror(cls, version: str, music: bool) -> None:
-        app = "youtube-music" if music else "youtube"
+    def apkmirror(cls, app, version: str) -> None:
         version = "-".join(
             v.zfill(2 if i else 0) for i, v in enumerate(version.split("."))
         )
@@ -127,8 +127,17 @@ class Patches:
         self._twitter = twitter
         self._reddit = reddit
 
-    def get(self, music: bool) -> Tuple[List[Dict[str, str]], str]:
-        patches = self._ytm if music else self._yt
+    def get(self, app) -> Tuple[List[Dict[str, str]], str]:
+        if "twitter" == app:
+            patches = self._twitter
+        elif "reddit" == app:
+            patches = self._reddit
+        elif "music" == app:
+            patches = self._ytm
+        elif "youtube" == app:
+            patches = self._yt
+        else:
+            sys.exit(-1)
         version = next(i["version"] for i in patches if i["version"] != "all")
         return patches, version
 
@@ -145,18 +154,18 @@ class ArgParser:
         cls._PATCHES.extend(["-e", name])
 
     @classmethod
-    def run(cls, output: str = "revanced.apk") -> None:
+    def run(cls, app: str) -> None:
         args = [
             "-jar",
             "cli.jar",
             "-a",
-            "youtube.apk",
+            app,
             "-b",
             "patches.jar",
             "-m",
             "integrations.apk",
             "-o",
-            "output.apk",
+            f"{app}-output.apk",
         ]
         args[1::2] = map(lambda i: temp_folder.joinpath(i), args[1::2])
 
@@ -187,36 +196,39 @@ def check_java():
         exit(-1)
 
 
-def main():
+def pre_requisite():
     check_java()
     patches = Patches()
+    return patches
+
+
+def main():
+    patches = pre_requisite()
     downloader = Downloader
     arg_parser = ArgParser
 
+    with ThreadPoolExecutor() as executor:
+        executor.map(downloader.repository, ("cli", "integrations", "patches"))
+
     def get_patches():
-        longest = len(max(app_patches, key=lambda p: len(p["name"]))["name"])
-
-        for i, v in enumerate(app_patches):
-            print(f'[{i:>02}] {v["name"]:<{longest + 4}}: {v["description"]}')
         selected_patches = list(range(0, len(app_patches)))
-        selected_patches.remove(9)
-
+        if app == 'youtube':
+            selected_patches.remove(9)
         for i, v in enumerate(app_patches):
             arg_parser.include(
                 v["name"]
             ) if i in selected_patches else arg_parser.exclude(v["name"])
 
-    app = "yt"
-    app_patches, version = patches.get((music := app == "ytm"))
-
-    with ThreadPoolExecutor() as executor:
-        executor.map(downloader.repository, ("cli", "integrations", "patches"))
-        executor.submit(downloader.apkmirror, version, music)
-        executor.submit(get_patches).add_done_callback(lambda _: downloader.report())
-    print("Download completed.")
-
-    arg_parser.run()
-    print("Wait for programme to exit.")
+    for app in apps:
+        app_patches, version = patches.get(app=app)
+        with ThreadPoolExecutor() as executor:
+            executor.submit(downloader.apkmirror, app, version)
+            executor.submit(get_patches).add_done_callback(
+                lambda _: downloader.report()
+            )
+        print("Download completed.")
+        arg_parser.run(app=app)
+        print("Wait for programme to exit.")
 
 
 if __name__ == "__main__":
