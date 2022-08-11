@@ -67,14 +67,10 @@ class Downloader:
             v.zfill(2 if i else 0) for i, v in enumerate(version.split("."))
         )
         print(f"Version for {app} to download  from apkmirror is {version}")
-        v = version
-        a = app
         page = f"""
         {apk_mirror}/apk/google-inc/
-        {a}/{a}-{v}-release/{a}-{v}-android-apk-download/
+        {app}/{app}-{version}-release/{app}-{version}-android-apk-download/
         """
-        print(page)
-        print("lol")
         cls.extract_download_link(page, app)
 
     @classmethod
@@ -272,23 +268,26 @@ def main() -> None:
             ) if i in selected_patches else arg_parser.exclude(v["name"])
 
     for app in apps:
-        arg_parser = ArgParser
-        print("Trying to build %s" % app)
-        app_patches, version = patches.get(app=app)
-        with ThreadPoolExecutor() as executor:
-            executor.submit(
-                downloader.apkmirror_reddit_twitter
-                if app == "reddit" or app == "twitter"
-                else downloader.apkmirror,
-                app,
-                version,
-            )
-            executor.submit(get_patches).add_done_callback(
-                lambda _: downloader.report()
-            )
-        print(f"Download completed {app}")
-        arg_parser.run(app=app)
-        print("Wait for programme to exit.")
+        try:
+            arg_parser = ArgParser
+            print("Trying to build %s" % app)
+            app_patches, version = patches.get(app=app)
+            with ThreadPoolExecutor() as executor:
+                executor.submit(
+                    downloader.apkmirror_reddit_twitter
+                    if app == "reddit" or app == "twitter"
+                    else downloader.apkmirror,
+                    app,
+                    version,
+                )
+                executor.submit(get_patches).add_done_callback(
+                    lambda _: downloader.report()
+                )
+            print(f"Download completed {app}")
+            arg_parser.run(app=app)
+            print("Wait for programme to exit.")
+        except Exception as e:
+            print(f"Failed to build {app} because of {e}")
 
 
 if __name__ == "__main__":
