@@ -15,6 +15,7 @@ from tqdm import tqdm
 temp_folder = Path("apks")
 session = Session()
 session.headers["User-Agent"] = "anything"
+apps = ["youtube", "ytmusic", "twitter", "reddit"]
 
 
 class Downloader:
@@ -101,9 +102,6 @@ class Patches:
             lines = app.splitlines()
 
             app_name = lines[0][1:-1]
-            if "youtube" not in app_name:
-                continue
-
             app_patches = []
             for line in lines:
                 patch = line.split("|")[1:-1]
@@ -111,15 +109,23 @@ class Patches:
                     (n, d, v), a = [i.replace("`", "").strip() for i in patch], app_name
                     app_patches.append((n, d, a, v))
 
-            available_patches.extend(app_patches[2:])
+            available_patches.extend(app_patches)
 
-        youtube, music = [], []
+        youtube, music, twitter, reddit = [], [], [], []
         for n, d, a, v in available_patches:
             patch = {"name": n, "description": d, "app": a, "version": v}
-            music.append(patch) if "music" in a else youtube.append(patch)
-
+            if "twitter" in a:
+                twitter.append(patch)
+            elif "reddit" in a:
+                reddit.append(patch)
+            elif "music" in a:
+                music.append(patch)
+            elif "youtube" in a:
+                youtube.append(patch)
         self._yt = youtube
         self._ytm = music
+        self._twitter = twitter
+        self._reddit = reddit
 
     def get(self, music: bool) -> Tuple[List[Dict[str, str]], str]:
         patches = self._ytm if music else self._yt
