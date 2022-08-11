@@ -16,8 +16,8 @@ from tqdm import tqdm
 temp_folder = Path("apks")
 session = Session()
 session.headers["User-Agent"] = "anything"
-# apps = ["youtube", "youtube-music", "twitter", "reddit"]
-apps = ["twitter", "reddit"]
+apps = ["youtube", "youtube-music", "twitter", "reddit"]
+apk_mirror = "https://www.apkmirror.com"
 
 
 class Downloader:
@@ -47,29 +47,57 @@ class Downloader:
         print(f"Downloaded {file_name}")
 
     @classmethod
-    def apkmirror(cls, app, version: str) -> None:
-        print(f"Trying to download {app} apk from apkmirror")
-        version = "-".join(
-            v.zfill(2 if i else 0) for i, v in enumerate(version.split("."))
-        )
-        print(f"Version for {app} to download  from apkmirror is {version}")
-
-        page = """
-        https://www.apkmirror.com/apk/google-inc/
-        {a}/{a}-{v}-release/{a}-{v}-android-apk-download/
-        """
-        parser = LexborHTMLParser(session.get(page.format(v=version, a=app)).text)
+    def extract_download_link(cls, page: str, app: str):
+        parser = LexborHTMLParser(session.get(page).text)
 
         resp = session.get(
-            "https://www.apkmirror.com"
-            + parser.css_first("a.accent_bg").attributes["href"]
+            apk_mirror + parser.css_first("a.accent_bg").attributes["href"]
         )
         parser = LexborHTMLParser(resp.text)
 
         href = parser.css_first(
             "p.notes:nth-child(3) > span:nth-child(1) > a:nth-child(1)"
         ).attributes["href"]
-        cls._download("https://www.apkmirror.com" + href, f"{app}.apk")
+        cls._download(apk_mirror + href, f"{app}.apk")
+
+    @classmethod
+    def apkmirror(cls, app: str, version: str) -> None:
+        print(f"Trying to download {app} apk from apkmirror")
+        version = "-".join(
+            v.zfill(2 if i else 0) for i, v in enumerate(version.split("."))
+        )
+        print(f"Version for {app} to download  from apkmirror is {version}")
+        v = version, a = app
+        page = f"""
+        {apk_mirror}/apk/google-inc/
+        {a}/{a}-{v}-release/{a}-{v}-android-apk-download/
+        """
+        cls.extract_download_link(page, app)
+
+    @classmethod
+    def find_second_last(cls, text: str, pattern: str) -> int:
+        return text.rfind(pattern, 0, text.rfind(pattern))
+
+    @classmethod
+    def apkmirror_reddit_twitter(cls, app: str, version: str) -> None:
+        print(f"Trying to download {app} apk from apkmirror")
+        if app == "reddit":
+            page = f"{apk_mirror}/apk/redditinc/reddit/"
+        elif app == "twitter":
+            page = f"{apk_mirror}/apk/twitter-inc/twitter/"
+        else:
+            print("Invalid app")
+            sys.exit(1)
+        parser = LexborHTMLParser(session.get(page).text)
+        suburl = parser.css_first("a.downloadLink").attributes["href"]
+        last2 = cls.find_second_last(suburl, "/")
+        version_url = suburl[last2:]
+        minus_occurance = version_url.rfind("-")
+        version_url = version_url[:minus_occurance]
+        download_url = version_url + "-2-android-apk-download/"
+        url = apk_mirror + suburl + download_url[1:]
+        page = url
+        cls.extract_download_link(page, app)
 
     @classmethod
     def repository(cls, name: str) -> None:
@@ -99,7 +127,7 @@ class Downloader:
 
 
 class Patches:
-    def __init__(self):
+    def __init__(self) -> None:
         print("fetching all patches")
         resp = session.get(
             "https://raw.githubusercontent.com/revanced/revanced-patches/main/README.md"
@@ -138,7 +166,7 @@ class Patches:
         print(f"Total patches in twitter are {len(twitter)}")
         print(f"Total patches in reddit are {len(reddit)}")
 
-    def get(self, app) -> Tuple[List[Dict[str, str]], str]:
+    def get(self, app: str) -> Tuple[List[Dict[str, str]], str]:
         print("Getting patches for %s" % app)
         if "twitter" == app:
             patches = self._twitter
@@ -199,14 +227,14 @@ class ArgParser:
 
 
 @register
-def close():
+def close() -> None:
     session.close()
     cache = Path("revanced-cache")
     if cache.is_dir():
         rmtree(cache)
 
 
-def check_java():
+def check_java() -> None:
     print("Checking if java is available")
     jd = subprocess.check_output(["java", "-version"], stderr=subprocess.STDOUT)
     jd = str(jd)[1:-1]
@@ -221,14 +249,14 @@ def pre_requisite():
     return patches
 
 
-def main():
+def main() -> None:
     patches = pre_requisite()
     downloader = Downloader
 
     with ThreadPoolExecutor() as executor:
         executor.map(downloader.repository, ("cli", "integrations", "patches"))
 
-    def get_patches():
+    def get_patches() -> None:
         print(f"Getting patches for app {app}")
         selected_patches = list(range(0, len(app_patches)))
         if app == "youtube":

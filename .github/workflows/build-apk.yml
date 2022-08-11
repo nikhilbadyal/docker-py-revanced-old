@@ -21,8 +21,8 @@ jobs:
           docker-compose up
 
       - name: Upload Build Artifact(youtube)
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.10.0
         with:
-          artifacts: "apks/output.apk"
+          artifacts: "apks/*-output.apk"
           token: ${{ secrets.GH_TOKEN }}
           tag: Latest-${{ github.run_id }}-${{ github.run_attempt }}
