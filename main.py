@@ -16,7 +16,7 @@ from tqdm import tqdm
 temp_folder = Path("apks")
 session = Session()
 session.headers["User-Agent"] = "anything"
-apps = ["twitter", "reddit"]
+apps = ["youtube-music", "twitter", "reddit"]
 apk_mirror = "https://www.apkmirror.com"
 
 
@@ -72,6 +72,7 @@ class Downloader:
         {apk_mirror}/apk/google-inc/
         {a}/{a}-{v}-release/{a}-{v}-android-apk-download/
         """
+        print(page)
         cls.extract_download_link(page, app)
 
     @classmethod
@@ -80,7 +81,7 @@ class Downloader:
 
     @classmethod
     def apkmirror_reddit_twitter(cls, app: str, version: str) -> None:
-        print(f"Trying to download {app} apk from apkmirror")
+        print(f"Trying to download {app} apk from apkmirror in rt")
         if app == "reddit":
             page = f"{apk_mirror}/apk/redditinc/reddit/"
         elif app == "twitter":
