@@ -242,6 +242,7 @@ def check_java() -> None:
     if "Runtime Environment" not in jd:
         print("Java Must be installed")
         exit(-1)
+    print("Cool!! Java is available")
 
 
 def pre_requisite():
@@ -288,6 +289,7 @@ def main() -> None:
             print("Wait for programme to exit.")
         except Exception as e:
             print(f"Failed to build {app} because of {e}")
+            sys.exit(-1)
 
 
 if __name__ == "__main__":
