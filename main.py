@@ -172,7 +172,7 @@ class ArgParser:
             "-jar",
             "cli.jar",
             "-a",
-            app,
+            app + ".apk",
             "-b",
             "patches.jar",
             "-m",
@@ -246,7 +246,7 @@ def main():
                 lambda _: downloader.report()
             )
         print(f"Download completed {app}")
-        arg_parser.run(app=(app + ".apk"))
+        arg_parser.run(app=app)
         print("Wait for programme to exit.")
 
 
