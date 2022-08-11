@@ -43,6 +43,7 @@ class Downloader:
                 size = dl_file.write(chunk)
                 bar.update(size)
         cls._QUEUE.put((perf_counter() - start, file_name))
+        print(f"Downloaded {file_name} from apkmirror")
 
     @classmethod
     def apkmirror(cls, app, version: str) -> None:
@@ -96,6 +97,7 @@ class Downloader:
 
 class Patches:
     def __init__(self):
+        print("fetching all patches")
         resp = session.get(
             "https://raw.githubusercontent.com/revanced/revanced-patches/main/README.md"
         )
@@ -128,6 +130,10 @@ class Patches:
         self._ytm = music
         self._twitter = twitter
         self._reddit = reddit
+        print(f"Total patches in youtube are {len(youtube)}")
+        print(f"Total patches in youtube-music are {len(music)}")
+        print(f"Total patches in twitter are {len(twitter)}")
+        print(f"Total patches in reddit are {len(reddit)}")
 
     def get(self, app) -> Tuple[List[Dict[str, str]], str]:
         print("Getting patches for %s" % app)
@@ -197,6 +203,7 @@ def close():
 
 
 def check_java():
+    print("Checking if java is available")
     jd = subprocess.check_output(["java", "-version"], stderr=subprocess.STDOUT)
     jd = str(jd)[1:-1]
     if "Runtime Environment" not in jd:
