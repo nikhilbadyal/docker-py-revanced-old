@@ -26,7 +26,7 @@ class Downloader:
 
     @classmethod
     def _download(cls, url: str, file_name: str) -> None:
-        print(f"Trying to download {file_name}")
+        print(f"Trying to download {file_name} from {url}")
         cls._QUEUE_LENGTH += 1
         start = perf_counter()
         resp = session.get(url, stream=True)
