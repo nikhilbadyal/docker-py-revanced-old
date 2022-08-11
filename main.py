@@ -20,12 +20,13 @@ apps = ["youtube", "youtube-music", "twitter", "reddit"]
 
 
 class Downloader:
-    _CHUNK_SIZE = 2 ** 21 * 5
+    _CHUNK_SIZE = 2**21 * 5
     _QUEUE = PriorityQueue()
     _QUEUE_LENGTH = 0
 
     @classmethod
     def _download(cls, url: str, file_name: str) -> None:
+        print(f"Trying to download {file_name} from apkmirror")
         cls._QUEUE_LENGTH += 1
         start = perf_counter()
         resp = session.get(url, stream=True)
@@ -45,6 +46,7 @@ class Downloader:
 
     @classmethod
     def apkmirror(cls, app, version: str) -> None:
+        print(f"Trying to download {app} apk from apkmirror")
         version = "-".join(
             v.zfill(2 if i else 0) for i, v in enumerate(version.split("."))
         )
@@ -128,6 +130,7 @@ class Patches:
         self._reddit = reddit
 
     def get(self, app) -> Tuple[List[Dict[str, str]], str]:
+        print("Getting patches for %s" % app)
         if "twitter" == app:
             patches = self._twitter
         elif "reddit" == app:
@@ -139,6 +142,7 @@ class Patches:
         else:
             sys.exit(-1)
         version = next(i["version"] for i in patches if i["version"] != "all")
+        print("Version for app is  %s" % version)
         return patches, version
 
 
@@ -155,6 +159,7 @@ class ArgParser:
 
     @classmethod
     def run(cls, app: str) -> None:
+        print(f"Sending request to revanced cli for building {app} revanced")
         args = [
             "-jar",
             "cli.jar",
@@ -177,7 +182,10 @@ class ArgParser:
         for line in process.stdout:
             print(line.decode(), flush=True, end="")
         process.wait()
-        print(f"Patching completed in {perf_counter() - start:.2f} seconds.")
+        print(
+            f"Patching completed for app {app} in {perf_counter() - start:.2f} "
+            f"seconds."
+        )
 
 
 @register
@@ -205,14 +213,14 @@ def pre_requisite():
 def main():
     patches = pre_requisite()
     downloader = Downloader
-    arg_parser = ArgParser
 
     with ThreadPoolExecutor() as executor:
         executor.map(downloader.repository, ("cli", "integrations", "patches"))
 
     def get_patches():
+        print(f"Getting patches for app {app}")
         selected_patches = list(range(0, len(app_patches)))
-        if app == 'youtube':
+        if app == "youtube":
             selected_patches.remove(9)
         for i, v in enumerate(app_patches):
             arg_parser.include(
@@ -220,6 +228,8 @@ def main():
             ) if i in selected_patches else arg_parser.exclude(v["name"])
 
     for app in apps:
+        arg_parser = ArgParser
+        print("Trying to build %s" % app)
         app_patches, version = patches.get(app=app)
         with ThreadPoolExecutor() as executor:
             executor.submit(downloader.apkmirror, app, version)
