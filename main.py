@@ -143,7 +143,7 @@ class Patches:
             patches = self._twitter
         elif "reddit" == app:
             patches = self._reddit
-        elif "music" == app:
+        elif "youtube-music" == app:
             patches = self._ytm
         elif "youtube" == app:
             patches = self._yt
