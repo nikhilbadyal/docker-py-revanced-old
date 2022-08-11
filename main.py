@@ -73,6 +73,7 @@ class Downloader:
         {a}/{a}-{v}-release/{a}-{v}-android-apk-download/
         """
         print(page)
+        print("lol")
         cls.extract_download_link(page, app)
 
     @classmethod
