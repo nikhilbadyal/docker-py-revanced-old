@@ -66,7 +66,7 @@ class Downloader:
         href = parser.css_first(
             "p.notes:nth-child(3) > span:nth-child(1) > a:nth-child(1)"
         ).attributes["href"]
-        cls._download("https://www.apkmirror.com" + href, "youtube.apk")
+        cls._download("https://www.apkmirror.com" + href, f"{app}.apk")
 
     @classmethod
     def repository(cls, name: str) -> None:
@@ -237,7 +237,7 @@ def main():
                 lambda _: downloader.report()
             )
         print("Download completed.")
-        arg_parser.run(app=app)
+        arg_parser.run(app=(app + ".apk"))
         print("Wait for programme to exit.")
 
 
