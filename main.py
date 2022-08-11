@@ -16,7 +16,7 @@ from tqdm import tqdm
 temp_folder = Path("apks")
 session = Session()
 session.headers["User-Agent"] = "anything"
-apps = ["youtube", "youtube-music", "twitter", "reddit"]
+apps = ["youtube-music", "twitter", "reddit"]
 apk_mirror = "https://www.apkmirror.com"
 
 
