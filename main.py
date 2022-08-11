@@ -244,7 +244,7 @@ def main():
             executor.submit(get_patches).add_done_callback(
                 lambda _: downloader.report()
             )
-        print("Download completed.")
+        print(f"Download completed {app}")
         arg_parser.run(app=(app + ".apk"))
         print("Wait for programme to exit.")
 
