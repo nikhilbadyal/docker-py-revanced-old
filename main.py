@@ -148,6 +148,7 @@ class Patches:
         elif "youtube" == app:
             patches = self._yt
         else:
+            print("Invalid app name.")
             sys.exit(-1)
         version = next(i["version"] for i in patches if i["version"] != "all")
         print("Version for app is  %s" % version)
