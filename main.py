@@ -26,7 +26,7 @@ class Downloader:
 
     @classmethod
     def _download(cls, url: str, file_name: str) -> None:
-        print(f"Trying to download {file_name} from apkmirror")
+        print(f"Trying to download {file_name}")
         cls._QUEUE_LENGTH += 1
         start = perf_counter()
         resp = session.get(url, stream=True)
@@ -43,7 +43,7 @@ class Downloader:
                 size = dl_file.write(chunk)
                 bar.update(size)
         cls._QUEUE.put((perf_counter() - start, file_name))
-        print(f"Downloaded {file_name} from apkmirror")
+        print(f"Downloaded {file_name}")
 
     @classmethod
     def apkmirror(cls, app, version: str) -> None:
@@ -71,6 +71,7 @@ class Downloader:
 
     @classmethod
     def repository(cls, name: str) -> None:
+        print(f"Trying to download {name} from github")
         resp = session.get(
             f"https://github.com/revanced/revanced-{name}/releases/latest"
         )
