@@ -16,8 +16,7 @@ from tqdm import tqdm
 temp_folder = Path("apks")
 session = Session()
 session.headers["User-Agent"] = "anything"
-apps = ["reddit"]
-# apps = ["youtube", "youtube-music", "twitter", "reddit"]
+apps = ["youtube", "youtube-music", "twitter", "reddit"]
 apk_mirror = "https://www.apkmirror.com"
 
 
@@ -253,6 +252,9 @@ def check_java() -> None:
     if "Runtime Environment" not in jd:
         logger.debug("Java Must be installed")
         exit(-1)
+    if "17" not in jd:
+        logger.debug("Java 17 Must be installed")
+        exit(-1)
     logger.debug("Cool!! Java is available")
 
 
@@ -294,7 +296,6 @@ def main() -> None:
             # downloader.report()
             logger.debug(f"Download completed {app}")
             arg_parser.run(app=app)
-            logger.debug("Wait for programme to exit.")
         except Exception as e:
             logger.debug(f"Failed to build {app} because of {e}")
             sys.exit(-1)
