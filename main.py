@@ -279,17 +279,12 @@ def main() -> None:
             arg_parser = ArgParser
             print("Trying to build %s" % app)
             app_patches, version = patches.get(app=app)
-            with ThreadPoolExecutor() as executor:
-                executor.submit(
-                    downloader.apkmirror_reddit_twitter
-                    if app == "reddit" or app == "twitter"
-                    else downloader.apkmirror,
-                    app,
-                    version,
-                )
-                executor.submit(get_patches).add_done_callback(
-                    lambda _: downloader.report()
-                )
+            if app == "reddit" or app == "twitter":
+                downloader.apkmirror_reddit_twitter(app, version)
+            else:
+                downloader.apkmirror(app, version)
+            get_patches()
+            downloader.report()
             print(f"Download completed {app}")
             arg_parser.run(app=app)
             print("Wait for programme to exit.")
