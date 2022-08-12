@@ -8,6 +8,7 @@ from subprocess import PIPE, Popen
 from time import perf_counter
 from typing import Dict, List, Tuple
 
+from loguru import logger
 from requests import Session
 from selectolax.lexbor import LexborHTMLParser
 from tqdm import tqdm
@@ -26,7 +27,7 @@ class Downloader:
 
     @classmethod
     def _download(cls, url: str, file_name: str) -> None:
-        print(f"Trying to download {file_name} from {url}")
+        logger.debug(f"Trying to download {file_name} from {url}")
         cls._QUEUE_LENGTH += 1
         start = perf_counter()
         resp = session.get(url, stream=True)
@@ -43,11 +44,11 @@ class Downloader:
                 size = dl_file.write(chunk)
                 bar.update(size)
         cls._QUEUE.put((perf_counter() - start, file_name))
-        print(f"Downloaded {file_name}")
+        logger.debug(f"Downloaded {file_name}")
 
     @classmethod
     def extract_download_link(cls, page: str, app: str):
-        print(f"Extracting download link from {page}")
+        logger.debug(f"Extracting download link from {page}")
         parser = LexborHTMLParser(session.get(page).text)
 
         resp = session.get(
@@ -59,15 +60,15 @@ class Downloader:
             "p.notes:nth-child(3) > span:nth-child(1) > a:nth-child(1)"
         ).attributes["href"]
         cls._download(apk_mirror + href, f"{app}.apk")
-        print(f"Finished Extracting and download link from {page}")
+        logger.debug(f"Finished Extracting and download link from {page}")
 
     @classmethod
     def apkmirror(cls, app: str, version: str) -> None:
-        print(f"Trying to download {app} apk from apkmirror")
+        logger.debug(f"Trying to download {app} apk from apkmirror")
         version = "-".join(
             v.zfill(2 if i else 0) for i, v in enumerate(version.split("."))
         )
-        print(f"Version for {app} to download  from apkmirror is {version}")
+        logger.debug(f"Version for {app} to download  from apkmirror is {version}")
         page = f"""
         {apk_mirror}/apk/google-inc/
         {app}/{app}-{version}-release/{app}-{version}-android-apk-download/
@@ -80,13 +81,13 @@ class Downloader:
 
     @classmethod
     def apkmirror_reddit_twitter(cls, app: str, version: str) -> None:
-        print(f"Trying to download {app} apk from apkmirror in rt")
+        logger.debug(f"Trying to download {app} apk from apkmirror in rt")
         if app == "reddit":
             page = f"{apk_mirror}/apk/redditinc/reddit/"
         elif app == "twitter":
             page = f"{apk_mirror}/apk/twitter-inc/twitter/"
         else:
-            print("Invalid app")
+            logger.debug("Invalid app")
             sys.exit(1)
         parser = LexborHTMLParser(session.get(page).text)
         suburl = parser.css_first("a.downloadLink").attributes["href"]
@@ -98,11 +99,11 @@ class Downloader:
         url = apk_mirror + suburl + download_url[1:]
         page = url
         cls.extract_download_link(page, app)
-        print(f"Downloaded {app} apk from apkmirror in rt")
+        logger.debug(f"Downloaded {app} apk from apkmirror in rt")
 
     @classmethod
     def repository(cls, name: str) -> None:
-        print(f"Trying to download {name} from github")
+        logger.debug(f"Trying to download {name} from github")
         resp = session.get(
             f"https://github.com/revanced/revanced-{name}/releases/latest"
         )
@@ -117,7 +118,7 @@ class Downloader:
         started = False
         while True:
             item = cls._QUEUE.get()
-            print(f"{item[1]} downloaded in {item[0]:.2f} seconds.")
+            logger.debug(f"{item[1]} downloaded in {item[0]:.2f} seconds.")
             cls._QUEUE.task_done()
             cls._QUEUE_LENGTH -= 1
 
@@ -129,7 +130,7 @@ class Downloader:
 
 class Patches:
     def __init__(self) -> None:
-        print("fetching all patches")
+        logger.debug("fetching all patches")
         resp = session.get(
             "https://raw.githubusercontent.com/revanced/revanced-patches/main/README.md"
         )
@@ -162,13 +163,13 @@ class Patches:
         self._ytm = music
         self._twitter = twitter
         self._reddit = reddit
-        print(f"Total patches in youtube are {len(youtube)}")
-        print(f"Total patches in youtube-music are {len(music)}")
-        print(f"Total patches in twitter are {len(twitter)}")
-        print(f"Total patches in reddit are {len(reddit)}")
+        logger.debug(f"Total patches in youtube are {len(youtube)}")
+        logger.debug(f"Total patches in youtube-music are {len(music)}")
+        logger.debug(f"Total patches in twitter are {len(twitter)}")
+        logger.debug(f"Total patches in reddit are {len(reddit)}")
 
     def get(self, app: str) -> Tuple[List[Dict[str, str]], str]:
-        print("Getting patches for %s" % app)
+        logger.debug("Getting patches for %s" % app)
         if "twitter" == app:
             patches = self._twitter
         elif "reddit" == app:
@@ -178,14 +179,14 @@ class Patches:
         elif "youtube" == app:
             patches = self._yt
         else:
-            print("Invalid app name")
+            logger.debug("Invalid app name")
             sys.exit(-1)
         version = ""
         if app in ("youtube", "youtube-music"):
             version = next(i["version"] for i in patches if i["version"] != "all")
-            print("Version for app is  %s" % version)
+            logger.debug("Version for app is  %s" % version)
         else:
-            print("Empty version because it's not youtube or youtube-music")
+            logger.debug("Empty version because it's not youtube or youtube-music")
         return patches, version
 
 
@@ -202,7 +203,7 @@ class ArgParser:
 
     @classmethod
     def run(cls, app: str) -> None:
-        print(f"Sending request to revanced cli for building {app} revanced")
+        logger.debug(f"Sending request to revanced cli for building {app} revanced")
         args = [
             "-jar",
             "cli.jar",
@@ -223,9 +224,9 @@ class ArgParser:
         start = perf_counter()
         process = Popen(["java", *args], stdout=PIPE)
         for line in process.stdout:
-            print(line.decode(), flush=True, end="")
+            logger.debug(line.decode(), flush=True, end="")
         process.wait()
-        print(
+        logger.debug(
             f"Patching completed for app {app} in {perf_counter() - start:.2f} "
             f"seconds."
         )
@@ -240,13 +241,13 @@ def close() -> None:
 
 
 def check_java() -> None:
-    print("Checking if java is available")
+    logger.debug("Checking if java is available")
     jd = subprocess.check_output(["java", "-version"], stderr=subprocess.STDOUT)
     jd = str(jd)[1:-1]
     if "Runtime Environment" not in jd:
-        print("Java Must be installed")
+        logger.debug("Java Must be installed")
         exit(-1)
-    print("Cool!! Java is available")
+    logger.debug("Cool!! Java is available")
 
 
 def pre_requisite():
@@ -264,7 +265,7 @@ def main() -> None:
     # downloader.report()
 
     def get_patches() -> None:
-        print(f"Excluding patches for app {app}")
+        logger.debug(f"Excluding patches for app {app}")
         selected_patches = list(range(0, len(app_patches)))
         if app == "youtube":
             selected_patches.remove(9)
@@ -272,12 +273,12 @@ def main() -> None:
             arg_parser.include(
                 v["name"]
             ) if i in selected_patches else arg_parser.exclude(v["name"])
-        print(f"Excluded patches for app {app}")
+        logger.debug(f"Excluded patches for app {app}")
 
     for app in apps:
         try:
             arg_parser = ArgParser
-            print("Trying to build %s" % app)
+            logger.debug("Trying to build %s" % app)
             app_patches, version = patches.get(app=app)
             if app == "reddit" or app == "twitter":
                 downloader.apkmirror_reddit_twitter(app, version)
@@ -285,11 +286,11 @@ def main() -> None:
                 downloader.apkmirror(app, version)
             get_patches()
             # downloader.report()
-            print(f"Download completed {app}")
+            logger.debug(f"Download completed {app}")
             arg_parser.run(app=app)
-            print("Wait for programme to exit.")
+            logger.debug("Wait for programme to exit.")
         except Exception as e:
-            print(f"Failed to build {app} because of {e}")
+            logger.debug(f"Failed to build {app} because of {e}")
             sys.exit(-1)
 
 
