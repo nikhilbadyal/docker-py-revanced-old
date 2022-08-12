@@ -264,6 +264,7 @@ def main() -> None:
     downloader.repository("cli")
     downloader.repository("integrations")
     downloader.repository("patches")
+    downloader.report()
 
     def get_patches() -> None:
         print(f"Excluding patches for app {app}")
