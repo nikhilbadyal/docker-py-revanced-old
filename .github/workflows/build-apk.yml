@@ -1,5 +1,8 @@
 name: Build Revanced APK
-
+# Enable Buildkit and let compose use it to speed up image building
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
 on:
   push:
     branches:
@@ -7,6 +10,9 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 jobs:
   build-apk:
     name: APK Build

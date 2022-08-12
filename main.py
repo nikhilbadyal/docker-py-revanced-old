@@ -219,7 +219,6 @@ class ArgParser:
         ]
         if app == "reddit":
             args.append("-r")
-            args.append("False")
             args.remove("-m")
             args.remove("integrations.apk")
 
