@@ -267,6 +267,7 @@ def main() -> None:
             arg_parser.include(
                 v["name"]
             ) if i in selected_patches else arg_parser.exclude(v["name"])
+        print(f"Excluded patches for app {app}")
 
     for app in apps:
         try:
