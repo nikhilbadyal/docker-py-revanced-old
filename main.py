@@ -258,9 +258,6 @@ def pre_requisite():
 def main() -> None:
     patches = pre_requisite()
     downloader = Downloader
-
-    # with ThreadPoolExecutor() as executor:
-    #     executor.map(downloader.repository, ("cli", "integrations", "patches"))
     downloader.repository("cli")
     downloader.repository("integrations")
     downloader.repository("patches")
