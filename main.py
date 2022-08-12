@@ -1,7 +1,6 @@
 import subprocess
 import sys
 from atexit import register
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from queue import PriorityQueue
 from shutil import rmtree
@@ -260,8 +259,11 @@ def main() -> None:
     patches = pre_requisite()
     downloader = Downloader
 
-    with ThreadPoolExecutor() as executor:
-        executor.map(downloader.repository, ("cli", "integrations", "patches"))
+    # with ThreadPoolExecutor() as executor:
+    #     executor.map(downloader.repository, ("cli", "integrations", "patches"))
+    downloader.repository("cli")
+    downloader.repository("integrations")
+    downloader.repository("patches")
 
     def get_patches() -> None:
         print(f"Excluding patches for app {app}")
