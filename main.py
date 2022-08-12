@@ -48,6 +48,7 @@ class Downloader:
 
     @classmethod
     def extract_download_link(cls, page: str, app: str):
+        print(f"Extracting download link from {page}")
         parser = LexborHTMLParser(session.get(page).text)
 
         resp = session.get(
@@ -59,6 +60,7 @@ class Downloader:
             "p.notes:nth-child(3) > span:nth-child(1) > a:nth-child(1)"
         ).attributes["href"]
         cls._download(apk_mirror + href, f"{app}.apk")
+        print(f"Finished Extracting and download link from {page}")
 
     @classmethod
     def apkmirror(cls, app: str, version: str) -> None:
@@ -97,6 +99,7 @@ class Downloader:
         url = apk_mirror + suburl + download_url[1:]
         page = url
         cls.extract_download_link(page, app)
+        print(f"Downloaded {app} apk from apkmirror in rt")
 
     @classmethod
     def repository(cls, name: str) -> None:
@@ -182,6 +185,8 @@ class Patches:
         if app in ("youtube", "youtube-music"):
             version = next(i["version"] for i in patches if i["version"] != "all")
             print("Version for app is  %s" % version)
+        else:
+            print("Empty version because it's not youtube or youtube-music")
         return patches, version
 
 
