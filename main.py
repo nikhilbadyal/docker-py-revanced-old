@@ -216,6 +216,12 @@ class ArgParser:
             "-o",
             f"{app}-output.apk",
         ]
+        if app == "reddit":
+            args.append("-r")
+            args.append("False")
+            args.remove("-m")
+            args.remove("integrations.apk")
+
         args[1::2] = map(lambda i: temp_folder.joinpath(i), args[1::2])
 
         if cls._PATCHES:
