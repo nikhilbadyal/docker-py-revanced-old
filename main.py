@@ -264,7 +264,7 @@ def main() -> None:
     downloader.repository("cli")
     downloader.repository("integrations")
     downloader.repository("patches")
-    downloader.report()
+    # downloader.report()
 
     def get_patches() -> None:
         print(f"Excluding patches for app {app}")
@@ -287,7 +287,7 @@ def main() -> None:
             else:
                 downloader.apkmirror(app, version)
             get_patches()
-            downloader.report()
+            # downloader.report()
             print(f"Download completed {app}")
             arg_parser.run(app=app)
             print("Wait for programme to exit.")
